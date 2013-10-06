@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>BOPlish: Browser-based Open Publishing</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/3.0.0/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <!-- Add custom CSS here -->
+    <style>
+      .container {
+        overflow: scroll;
+      }
+      .message-inspector-in {
+        background-color: lightgreen;
+      }
+      .message-inspector-out {
+        background-color: #EEDD82;
+      }
+      .message-inspector-forward {
+        background-color: lightblue;
+      }
+      #message-inspector-headers {
+        font-size: 0.9em;
+      }
+      #message-inspector-headers ul li {
+        margin-bottom: 2px;
+      }
+
+      .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+      }
+      .link {
+        stroke: #999;
+        stroke-opacity: .6;
+      }
+      #connected-peers li * {
+        margin: 0 2px;
+      }
+    </style>
+    <script src="jquery-1.10.2.min.js"></script>
+    <script src="static/third_party/d3js/d3.v3.min.js"></script>
+
+    <script src="boplish.min.js"></script>
+    <script src="apps.messageinspector.js"></script>
+    <script src="apps.topologyviewer.js"></script>
+    <script src="apps.game.js"></script>
+    <script src="protocols.ping.js"></script>
+    <script src="protocols.topology.js"></script>
+    <script src="protocols.bopcast.js"></script>
+
+    <script>
+      var bopclient = new BOPlishClient();
+      var pinger = new Ping(bopclient);
+      var bopcast = new BopCast(bopclient);
+      var topDisco = new TopologyDiscover(bopclient);
+      var topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
+
+      var game = new Game(bopclient, bopcast);
+
+      // uncomment to add a second peer in this browser
+      /*setTimeout(function(){
+        var bopclient2 = new BOPlishClient();
+        var pinger2 = new Ping(bopclient2);
+        var topDisco2 = new TopologyDiscover(bopclient2, function(){});
+      }, 1000);*/
+      
+      $(function(){
+        /**
+         * View Logic Message Inspector
+         *
+         */
+        var i;
+        new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
+        $('#boplish-peer-id').html(bopclient.id.substr(0,8));
+        setInterval(function(){
+          var peers = bopclient.getConnectedPeers();
+          $('#count-remote-peers').html(peers.length);
+          $('#connected-peers').empty();
+          for (i=0; i<peers.length; i++) {
+            var id = '<span>' + peers[i] . substr(0,8) + '</span>';
+            var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:pinger.sendPing("' + peers[i] + '")>Ping</button>';
+            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Game Registration</button>';
+            
+            $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
+            //$('#connected-peers').append('<li><a href="#top" onclick=javascript:pinger.sendPing("' + peers[i] + '")>' + peers[i].substr(0,8) + '</a></li>');
+          }
+        },1000)
+      });
+    </script>
+  </head>
+
+  <body>
+  <div class="container" id="top">
+    <div class="btn-group">
+      <button type="button" class="btn btn-default" onclick=javascript:$('#header-container').toggle()>Header</button>
+      <button type="button" class="btn btn-default" onclick=javascript:$('#message-inspector-container').toggle()>Message Inspector</button>
+      <button type="button" class="btn btn-default" onclick=javascript:$('#topology-viewer-container').toggle()>Topology Viewer</button>
+      <button type="button" class="btn btn-default" onclick=javascript:$('#game-container').toggle()>Game</button>
+      <button type="button" class="btn btn-default btn-primary">Peer Id: <span id="boplish-peer-id" /></button>
+    </div>
+  </div><!-- /.container -->
+  <div class="container" style="display:none" id="header-container">
+    <div class="jumbotron">
+      <h2>Leveraging WebRTC for P2P Content Distribution in Web Browsers.</h2>
+      <p>BOPlish: Browser-based Open Publishing</p>
+    </div>
+  </div><!-- /.container -->
+
+
+  <div class="container" id="message-inspector-container">
+    <div class="well">
+      <h3>Message Inspector</h3>
+      <div class="row" style="min-height: 510px">
+        <div class="col-md-4" style="-webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;">
+          <p>This browser-based peer is currently connected to <a id="count-remote-peers">0</a> remote peer(s) in the BOPlish network. Click on a peer id to send a ping message to it.</p>
+          <p>Id's of connected peers:</p>
+          <ul id="connected-peers">
+          </ul>
+        </div>
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-4">
+              <h4>Messages:</h4>
+              <h5><span class="message-inspector-in">IN</span> <span class="message-inspector-out">OUT</span> <span class="message-inspector-forward">FORWARD</span></h5>
+              <div id="message-inspector-headers"></div>
+            </div>
+            <div class="col-md-8">
+              <h4>Inspected Message</h4>
+              <div id="message-inspector-message"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.container -->
+
+
+  <div class="container" id="topology-viewer-container">
+    <div class="well">
+      <h3>Topology Viewer
+        <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.update()>Send Topology Discover Request</button>
+        <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.startAutoDiscovery()>Start Automatic Mode</button>
+        <button type="button" class="btn btn-warning btn-sm" onclick=javascript:topoViewer.reset()>Reset</button>
+      </h3>
+      <svg id="topology-viewer-container-svg"></svg>
+    </div>
+  </div><!-- /.container -->
+
+  <div class="container" id="game-container">
+    <div class="well">
+      <h3>Game
+      <button type="button" class="btn btn-success btn-sm" onclick=javascript:game._draw()>Start</button>
+      <span class="glyphicon glyphicon-arrow-left" style="cursor:pointer" onclick=javascript:game.moveLeft()></span>
+      <span class="glyphicon glyphicon-arrow-right" style="cursor:pointer" onclick=javascript:game.moveRight()></span>
+      <span class="glyphicon glyphicon-arrow-up" style="cursor:pointer" onclick=javascript:game.moveUp()></span>
+      <span class="glyphicon glyphicon-arrow-down" style="cursor:pointer" onclick=javascript:game.moveDown()></span>
+      </h3>
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="static/third_party/bootstrap/js/bootstrap.js"></script>
+  </body>
+</html>
