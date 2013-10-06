@@ -31,7 +31,10 @@
       #message-inspector-headers ul li {
         margin-bottom: 2px;
       }
-
+      #message-inspector-container pre {
+        height: 300px;
+        overflow: auto;
+      }
       .node {
         stroke: #fff;
         stroke-width: 1.5px;
@@ -39,6 +42,10 @@
       .link {
         stroke: #999;
         stroke-opacity: .6;
+      }
+      #connected-peers {
+        overflow: auto;
+        height: 300px;
       }
       #connected-peers li * {
         margin: 0 2px;
@@ -117,7 +124,7 @@
   <div class="container" id="message-inspector-container">
     <div class="well">
       <h3>Message Inspector</h3>
-      <div class="row" style="min-height: 510px">
+      <div class="row">
         <div class="col-md-4" style="-webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;">
           <p>This browser-based peer is currently connected to <a id="count-remote-peers">0</a> remote peer(s) in the BOPlish network. Click on a peer id to send a ping message to it.</p>
           <p>Id's of connected peers:</p>
