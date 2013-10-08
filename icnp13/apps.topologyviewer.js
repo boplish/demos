@@ -31,6 +31,12 @@ TopologyViewer.prototype = {
             this._interval = setInterval(this.update.bind(this), 5000);
         }
     },
+    stopAutoDiscovery: function() {
+        if (this._interval) {
+            clearTimeout(this._interval);
+            this._interval = false;
+        }
+    },
     update: function() {
         this._topoProtocol.sendRequest();
         setTimeout(function(){

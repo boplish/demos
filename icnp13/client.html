@@ -152,9 +152,22 @@
   <div class="container" id="topology-viewer-container">
     <div class="well">
       <h3>Topology Viewer
-        <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.update()>Send Topology Discover Request</button>
-        <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.startAutoDiscovery()>Start Automatic Mode</button>
+        <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.update()>Send Request</button>
+        <button type="button" id="topopology-viewer-button-start" class="btn btn-success btn-sm" onclick=javascript:startAuto()>Start Interval</button>
+        <button type="button" id="topopology-viewer-button-stop" class="btn btn-success btn-sm" onclick=javascript:stopAuto()>Stop Interval</button>
         <button type="button" class="btn btn-warning btn-sm" onclick=javascript:topoViewer.reset()>Reset</button>
+        <script>
+          function startAuto () {
+            $('#topopology-viewer-button-start').prop('disabled','disabled');
+            $('#topopology-viewer-button-stop').prop('disabled','');
+            topoViewer.startAutoDiscovery()
+          }
+          function stopAuto () {
+            $('#topopology-viewer-button-start').prop('disabled','');
+            $('#topopology-viewer-button-stop').prop('disabled','disabled');
+            topoViewer.stopAutoDiscovery()
+          }
+        </script>
       </h3>
       <svg id="topology-viewer-container-svg"></svg>
     </div>
