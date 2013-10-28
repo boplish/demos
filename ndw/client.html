@@ -55,26 +55,27 @@
     <script src="apps.messageinspector.js"></script>
     <script src="apps.topologyviewer.js"></script>
     <script src="apps.game.js"></script>
+    <script src="apps.chat.js"></script>
     <script src="protocols.ping.js"></script>
     <script src="protocols.topology.js"></script>
     <script src="protocols.bopcast.js"></script>
 
     <script>
-      var bopclient = new BOPlishClient();
+      var bopclient = new BOPlishClient(null, function(){}, function(){});
       var pinger = new Ping(bopclient);
       var bopcast = new BopCast(bopclient);
       var topDisco = new TopologyDiscover(bopclient);
       var topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
 
-      var game = new Game(bopclient, bopcast);
+      var game;
+      var chat;
 
-      // uncomment to add a second peer in this browser
-      /*setTimeout(function(){
-        var bopclient2 = new BOPlishClient();
-        var pinger2 = new Ping(bopclient2);
-        var topDisco2 = new TopologyDiscover(bopclient2, function(){});
-      }, 1000);*/
-      
+      $(function(){
+        chat = new Chat(bopclient, bopcast, $('#chat-message-viewer'));
+        $('#chat-username').val(bopclient.id.substr(0,8));
+        game = new Game(bopclient, bopcast)
+      });
+
       $(function(){
         /**
          * View Logic Message Inspector
@@ -82,7 +83,9 @@
          */
         var i;
         new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
-        $('#boplish-peer-id').html(bopclient.id.substr(0,8));
+        $('.boplish-peer-id').each(function(index){
+          $(this).html(bopclient.id.substr(0,8));
+        });
         setInterval(function(){
           var peers = bopclient.getConnectedPeers();
           $('#count-remote-peers').html(peers.length);
@@ -90,7 +93,7 @@
           for (i=0; i<peers.length; i++) {
             var id = '<span>' + peers[i] . substr(0,8) + '</span>';
             var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:pinger.sendPing("' + peers[i] + '")>Ping</button>';
-            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Game Registration</button>';
+            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
             
             $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
             //$('#connected-peers').append('<li><a href="#top" onclick=javascript:pinger.sendPing("' + peers[i] + '")>' + peers[i].substr(0,8) + '</a></li>');
@@ -107,7 +110,8 @@
       <button type="button" class="btn btn-default" onclick=javascript:$('#message-inspector-container').toggle()>Message Inspector</button>
       <button type="button" class="btn btn-default" onclick=javascript:$('#topology-viewer-container').toggle()>Topology Viewer</button>
       <button type="button" class="btn btn-default" onclick=javascript:$('#game-container').toggle()>Game</button>
-      <button type="button" class="btn btn-default btn-primary">Peer Id: <span id="boplish-peer-id" /></button>
+      <button type="button" class="btn btn-default" onclick=javascript:$('#chat-container').toggle()>Chat</button>
+      <button type="button" class="btn btn-default btn-primary">Peer Id: <span class="boplish-peer-id" /></button>
     </div>
   </div><!-- /.container -->
   <div class="container" style="display:none" id="header-container">
@@ -118,7 +122,7 @@
   </div><!-- /.container -->
 
 
-  <div class="container" id="message-inspector-container">
+  <div class="container" style="display:none" id="message-inspector-container">
     <div class="well">
       <h3>Message Inspector</h3>
       <div class="row">
@@ -146,7 +150,7 @@
   </div><!-- /.container -->
 
 
-  <div class="container" id="topology-viewer-container">
+  <div class="container" style="display:none" id="topology-viewer-container">
     <div class="well">
       <h3>Topology Viewer
         <button type="button" class="btn btn-success btn-sm" onclick=javascript:topoViewer.update()>Send Request</button>
@@ -170,7 +174,7 @@
     </div>
   </div><!-- /.container -->
 
-  <div class="container" id="game-container">
+  <div class="container" style="display:none" id="game-container">
     <div class="well">
       <h3>Game
       <button type="button" class="btn btn-success btn-sm" onclick=javascript:game._draw()>Start</button>
@@ -181,6 +185,30 @@
       </h3>
       <canvas id="game-canvas"></canvas>
     </div>
+  </div><!-- /.container -->
+
+  <div class="container" id="chat-container">
+    <div class="well">
+      <h3>Chat</h3>
+      <textarea id="chat-message-viewer" class="form-control" rows="10" readonly></textarea>
+      <div class="input-group" style="width:100%; padding-top: 5px">
+        <input id="chat-username" style="width:10%" type="text" class="form-control" placeholder="Username"></input>
+        <input id="chat-current-message" onkeydown="if (event.keyCode === 13) {sendChatMessage();}" style="width:90%" type="text" class="form-control" placeholder="Message">
+        <span class="input-group-btn">
+          <button class="btn btn-primary" type="button" onclick=sendChatMessage()>Send Message!</button>
+        </span>
+      </div>
+    </div>
+    <script>
+      function sendChatMessage() {
+        var username = $('#chat-username').val();
+        var message = $('#chat-current-message').val();
+        if (message && message !== '') {
+          chat.sendMessage(username, message);
+          $('#chat-current-message').val('');
+        }
+      }
+    </script>
   </div><!-- /.container -->
 
     <!-- Bootstrap core JavaScript -->

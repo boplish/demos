@@ -6,7 +6,7 @@ Game = function(bopclient, bopcast) {
     this._messageQueue = new Array(100);
     this._bopclient = bopclient;
     this._bopcast = bopcast;
-    this._bopcast._callback = this._onMessage.bind(this);
+    this._bopcast.addCallback(this._onMessage.bind(this));
     //this._players = [];
     this._position = {
         posx: 10,
@@ -39,10 +39,14 @@ Game.prototype = {
             position: {
                 posx: posx,
                 posy: posy
-            }
+            },
+            type: 'game'
         });
     },
     _onMessage: function(msg, from) {
+        if (msg.type !== 'game' ) {
+            return;
+        }
         this._position = msg.position;
         // console.log('new position ' + msg + ' from: ' + from);
     },

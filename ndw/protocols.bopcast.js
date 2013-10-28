@@ -6,12 +6,13 @@ BopCast = function(bopclient) {
     this._protocolName = 'bopcast-protocol';
     this._bopclient.setOnMessageHandler(this._protocolName, this._onMessage.bind(this));
     this._receivers = [];
-    this._callback = function(){};
+    this._callbacks = [];
     return this;
 };
 
 BopCast.prototype = {
     _onMessage: function(msg, from) {
+        var i;
         if (msg.type === 'register-request') {
             this._onRegisterRequest(msg.data, from);
         } else if (msg.type === 'register-propagate') {
@@ -19,7 +20,9 @@ BopCast.prototype = {
         } else if (msg.type === 'register-response') {
             this._addReceiver(from);
         } else if (msg.type === 'deliver') {
-            this._callback(msg.data, from);
+            for (i=0; i<this._callbacks.length; i++) {
+                this._callbacks[i](msg.data, from);
+            }
         }
     },
     /** 
@@ -88,5 +91,9 @@ BopCast.prototype = {
      */
     getReceivers: function() {
         return this._receivers;
+    },
+
+    addCallback: function(callback) {
+        this._callbacks.push(callback);
     }
 };
