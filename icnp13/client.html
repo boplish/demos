@@ -60,29 +60,28 @@
     <script src="protocols.bopcast.js"></script>
 
     <script>
-      var bopclient = new BOPlishClient();
-      var pinger = new Ping(bopclient);
-      var bopcast = new BopCast(bopclient);
-      var topDisco = new TopologyDiscover(bopclient);
-      var topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
-
-      var game = new Game(bopclient, bopcast);
-
-      // uncomment to add a second peer in this browser
-      /*setTimeout(function(){
-        var bopclient2 = new BOPlishClient();
-        var pinger2 = new Ping(bopclient2);
-        var topDisco2 = new TopologyDiscover(bopclient2, function(){});
-      }, 1000);*/
-      
       $(function(){
+        var bopclient = new BOPlishClient(null, function(){}, function(msg){
+          $('#errorModalBody').append("<div class=\"alert alert-danger\">" + msg + "</div>");
+          $('#errorModal').modal({show:true});
+        });
+
+        var pinger = new Ping(bopclient);
+        var bopcast = new BopCast(bopclient);
+        var topDisco = new TopologyDiscover(bopclient);
+        var topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
+
+        var game = new Game(bopclient, bopcast);
+
         /**
          * View Logic Message Inspector
          *
          */
         var i;
         new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
-        $('#boplish-peer-id').html(bopclient.id.substr(0,8));
+        $('.boplish-peer-id').each(function(index){
+          $(this).html(bopclient.id.substr(0,8));
+        });
         setInterval(function(){
           var peers = bopclient.getConnectedPeers();
           $('#count-remote-peers').html(peers.length);
@@ -90,7 +89,7 @@
           for (i=0; i<peers.length; i++) {
             var id = '<span>' + peers[i] . substr(0,8) + '</span>';
             var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:pinger.sendPing("' + peers[i] + '")>Ping</button>';
-            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Game Registration</button>';
+            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
             
             $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
             //$('#connected-peers').append('<li><a href="#top" onclick=javascript:pinger.sendPing("' + peers[i] + '")>' + peers[i].substr(0,8) + '</a></li>');
@@ -182,6 +181,22 @@
       <canvas id="game-canvas"></canvas>
     </div>
   </div><!-- /.container -->
+  <!-- Error Modal -->
+  <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="errorModalLabel">Something went wrong</h4>
+        </div>
+        <div class="modal-body" id="errorModalBody">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 
     <!-- Bootstrap core JavaScript -->
     <!-- Placed at the end of the document so the pages load faster -->
