@@ -60,18 +60,20 @@
     <script src="protocols.bopcast.js"></script>
 
     <script>
+      var bopclient, pinger, bopcast, topDisco, topoViewer, game;
+      
       $(function(){
-        var bopclient = new BOPlishClient(null, function(){}, function(msg){
+        bopclient = new BOPlishClient(null, function(){}, function(msg){
           $('#errorModalBody').append("<div class=\"alert alert-danger\">" + msg + "</div>");
           $('#errorModal').modal({show:true});
         });
 
-        var pinger = new Ping(bopclient);
-        var bopcast = new BopCast(bopclient);
-        var topDisco = new TopologyDiscover(bopclient);
-        var topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
+        pinger = new Ping(bopclient);
+        bopcast = new BopCast(bopclient);
+        topDisco = new TopologyDiscover(bopclient);
+        topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
 
-        var game = new Game(bopclient, bopcast);
+        game = new Game(bopclient, bopcast);
 
         /**
          * View Logic Message Inspector
