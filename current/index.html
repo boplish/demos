@@ -64,7 +64,7 @@
       var bopclient, pinger, bopcast, topDisco, topoViewer, game, chat;
 
       $(function(){
-        bopclient = new BOPlishClient(null, function(){}, function(msg){
+        bopclient = new BOPlishClient("ws://0.0.0.0:5000/", function(){}, function(msg){
           $('#errorModalBody').append("<div class=\"alert alert-danger\">" + msg + "</div>");
           $('#errorModal').modal({show:true});
         });
