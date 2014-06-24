@@ -1,19 +1,18 @@
 TopologyViewer = function(bopclient, topoProtocol, svgId) {
     if(!(this instanceof TopologyViewer)) {
-        return new TopologyViewer(bopclient, topoProtocol, svg);
+        return new TopologyViewer(bopclient, topoProtocol, svgId);
     }
 
-    this._messageQueue = new Array(100);
     this._bopclient = bopclient;
-    this._nodes = [{
-        id: this._bopclient.id,
-        group:1
-    }];
-    this._links = [];
     this._topoProtocol = topoProtocol;
     this._topoProtocol.registerCallback(this._onTopoResponse.bind(this));
     this._svgId = svgId;
-    this._interval = false;
+
+    this._interval;
+    this._messageQueue;
+    this._nodes;
+    this._links;
+    this.reset();
     
     return this;
 };
@@ -23,6 +22,8 @@ TopologyViewer.prototype = {
         clearTimeout(this._interval);
         this._interval = false;
         this._messageQueue = new Array(100);
+        this._nodes = null;
+        this._links = null;
         this._render();
     },
     startAutoDiscovery: function() {
@@ -52,7 +53,12 @@ TopologyViewer.prototype = {
         });
     },
     _render: function() {
-        var changed = false;
+        this._links = [];
+        this._nodes = [{
+            id: this._bopclient.id,
+            group:1
+        }];
+
         // extract active nodes from queue
         var i, j, activeNodes = [];
         for (i=0; i<this._messageQueue.length; i++) {
@@ -69,7 +75,6 @@ TopologyViewer.prototype = {
             if (this._nodes[i].id !== bopclient.id && activeNodes.indexOf(this._nodes[i].id) === -1) {
                 console.log('removing ' + this._nodes[i].id);
                 this._nodes.splice(i, 1);
-                changed = true;
             }
         }
 
@@ -78,11 +83,8 @@ TopologyViewer.prototype = {
             updateNodeOrAdd(this._nodes, activeNodes[i]);
         }
         
-        // draw it if something changed or on coin flip
-        if (changed || Math.random() < 0.5) {
-            cleanLinks(this._links, this._nodes);
-            this._updateTopo();
-        }
+        cleanLinks(this._links, this._nodes);
+        this._updateTopo();
         return;
         
         /**
@@ -99,7 +101,6 @@ TopologyViewer.prototype = {
               return i;
             }
           }
-          changed = true;
           node = {id:nodeId, group:2};
           return nodes.push(node) - 1;
         }
@@ -113,7 +114,6 @@ TopologyViewer.prototype = {
               return;
             }
           }
-          changed = true;
           links.push({
             sourceId: sourceId,
             source: updateNodeOrAdd(nodes, sourceId),
