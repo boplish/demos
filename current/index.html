@@ -62,6 +62,11 @@
 
     <script>
       var bopclient, pinger, bopcast, topDisco, topoViewer, game, chat;
+      function ping(hostid) {
+        pinger.sendPing(hostid, null, function(err, ms) {
+          console.log('ping took', ms, 'ms');
+        });
+      };
 
       $(function(){
         bopclient = new BOPlishClient("ws://0.0.0.0:5000/", function(){}, function(msg){
@@ -82,7 +87,6 @@
          * View Logic Message Inspector
          *
          */
-        var i;
         new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
         $('.boplish-peer-id').each(function(index){
           $(this).html(bopclient.id.substr(0,8));
@@ -91,9 +95,9 @@
           var peers = bopclient.getConnectedPeers();
           $('#count-remote-peers').html(peers.length);
           $('#connected-peers').empty();
-          for (i=0; i<peers.length; i++) {
+          for (var i=0; i<peers.length; i++) {
             var id = '<span>' + peers[i] . substr(0,8) + '</span>';
-            var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:pinger.sendPing("' + peers[i] + '")>Ping</button>';
+            var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:ping("' + peers[i] + '")>Ping</button>';
             var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
             
             $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
