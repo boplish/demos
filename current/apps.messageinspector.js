@@ -36,7 +36,7 @@ MessageInspector.prototype = {
                 if (i===this._messageQueue.length-1) {
                     $(li).fadeIn();
                 }
-                if (this._messageQueue[i].from === this._bopclient.id) {
+                if (this._messageQueue[i].from === this._bopclient._router.id.toString()) {
                     chain = 'OUT';
                     if (this._messageQueue[i].to) {
                         el.appendChild(li).innerHTML = '<a href="#message-inspector-container"> ' + chain + '>' + ' {type: ' + this._messageQueue[i].type + ', to: ' + this._messageQueue[i].to.substr(0,8) + '}' + '</a>';
@@ -44,7 +44,7 @@ MessageInspector.prototype = {
                         el.appendChild(li).innerHTML = '<a href="#message-inspector-container"> ' + chain + '>' + ' {type: ' + this._messageQueue[i].type + ', to: ' + 'signalin' + '}' + '</a>';
                     }
                     li.className = 'message-inspector-out';
-                } else if (this._messageQueue[i].to === this._bopclient.id) {
+                } else if (this._messageQueue[i].to === this._bopclient._router.id.toString()) {
                     chain = 'IN';
                     el.appendChild(li).innerHTML = '<a href="#message-inspector-container"> ' + chain + '>' + ' {type: ' + this._messageQueue[i].type + ', from: ' + this._messageQueue[i].from.substr(0,8) + '}' + '</a>';
                     li.className = 'message-inspector-in';

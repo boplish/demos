@@ -4,16 +4,17 @@ Ping = function(bopclient) {
     }
     this._bopclient = bopclient;
     this._protocolName = 'ping-protocol';
-    this._bopclient.setOnMessageHandler(this._protocolName, this._onMessage.bind(this));
+    this.proto = this._bopclient.registerProtocol(this._protocolName);
+    this.proto.onmessage = this._onMessage.bind(this);
     this._pendingPings = {};
     return this;
 };
 
 Ping.prototype = {
-	_onMessage: function(msg, from) {
+	_onMessage: function(from, msg) {
 		if (msg.type === 'ping') {
-			this._bopclient.send(from, this._protocolName, {
-				date: Date(),
+			this.proto.send(from, {
+				date: msg.date,
 				type: 'pong',
 				ref: msg.ref
 			});
@@ -44,6 +45,6 @@ Ping.prototype = {
 				}
 			}.bind(this), timeout);
 		}
-		this._bopclient.send(to, this._protocolName, this._pendingPings[ref]);
+		this.proto.send(to, this._pendingPings[ref]);
 	}
 };

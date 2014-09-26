@@ -69,8 +69,8 @@
       };
 
       $(function(){
-        bopclient = new BOPlishClient("ws://0.0.0.0:5000/", function(){}, function(msg){
-          $('#errorModalBody').append("<div class=\"alert alert-danger\">" + msg + "</div>");
+        bopclient = new BOPlishClient("ws://localhost:5000/", function(){}, function(msg){
+          $('#errorModalBody').append("<div class=\"alert alert-danger\">" + JSON.stringify(msg) + "</div>");
           $('#errorModal').modal({show:true});
         });
 
@@ -81,15 +81,12 @@
 
         game = new Game(bopclient, bopcast);
         chat = new Chat(bopclient, bopcast, $('#chat-message-viewer'));
-        $('#chat-username').val(bopclient.id.substr(0,8));
+        $('#chat-username').val(bopclient.bopid);
 
-        /**
-         * View Logic Message Inspector
-         *
-         */
+        /** View Logic Message Inspector */
         new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
         $('.boplish-peer-id').each(function(index){
-          $(this).html(bopclient.id.substr(0,8));
+          $(this).html(bopclient.bopid);
         });
         setInterval(function(){
           var peers = bopclient.getConnectedPeers();
@@ -101,7 +98,6 @@
             var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
             
             $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
-            //$('#connected-peers').append('<li><a href="#top" onclick=javascript:pinger.sendPing("' + peers[i] + '")>' + peers[i].substr(0,8) + '</a></li>');
           }
         },1000)
       });
