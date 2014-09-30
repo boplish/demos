@@ -49,7 +49,7 @@
       }
     </style>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
 
     <script src="boplish.min.js"></script>
     <script src="apps.messageinspector.js"></script>
@@ -62,11 +62,6 @@
 
     <script>
       var bopclient, pinger, bopcast, topDisco, topoViewer, game, chat;
-      function ping(hostid) {
-        pinger.sendPing(hostid, null, function(err, ms) {
-          console.log('ping took', ms, 'ms');
-        });
-      };
 
       $(function(){
         bopclient = new BOPlishClient("ws://localhost:5000/", function(){}, function(msg){
@@ -75,13 +70,13 @@
         });
 
         pinger = new Ping(bopclient);
-        bopcast = new BopCast(bopclient);
-        topDisco = new TopologyDiscover(bopclient);
-        topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
+        //bopcast = new BopCast(bopclient);
+        //topDisco = new TopologyDiscover(bopclient);
+        //topoViewer = new TopologyViewer(bopclient, topDisco, '#topology-viewer-container-svg');
 
-        game = new Game(bopclient, bopcast);
-        chat = new Chat(bopclient, bopcast, $('#chat-message-viewer'));
-        $('#chat-username').val(bopclient.bopid);
+        //game = new Game(bopclient, bopcast);
+        //chat = new Chat(bopclient, bopcast, $('#chat-message-viewer'));
+        //$('#chat-username').val(bopclient.bopid);
 
         /** View Logic Message Inspector */
         new MessageInspector(bopclient, $('#message-inspector-headers'), $('#message-inspector-message'));
@@ -90,14 +85,15 @@
         });
         setInterval(function(){
           var peers = bopclient.getConnectedPeers();
+          document.title = bopclient._router.id.toString();
           $('#count-remote-peers').html(peers.length);
           $('#connected-peers').empty();
           for (var i=0; i<peers.length; i++) {
-            var id = '<span>' + peers[i] . substr(0,8) + '</span>';
-            var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:ping("' + peers[i] + '")>Ping</button>';
-            var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
+            var id = '<span>' + peers[i].substr(0, 15) + '</span>';
+            //var buttonPing =  '<button type="button" class="btn btn-default btn-xs" onclick=javascript:ping("' + peers[i] + '")>Ping</button>';
+            //var buttonBopcast = '<button type="button" class="btn btn-default btn-xs" onclick=javascript:bopcast.register("' + peers[i] + '")>Bopcast Registration</button>';
             
-            $('#connected-peers').append('<li>' + id + buttonPing + buttonBopcast + '</li>');
+            $('#connected-peers').append('<li>' + id + '</li>');
           }
         },1000)
       });
@@ -109,10 +105,10 @@
     <div class="btn-group">
       <button type="button" class="btn btn-default" onclick=javascript:$('#header-container').toggle()>Header</button>
       <button type="button" class="btn btn-default" onclick=javascript:$('#message-inspector-container').toggle()>Message Inspector</button>
-      <button type="button" class="btn btn-default" onclick=javascript:$('#topology-viewer-container').toggle()>Topology Viewer</button>
-      <button type="button" class="btn btn-default" onclick=javascript:$('#game-container').toggle()>Game</button>
-      <button type="button" class="btn btn-default" onclick=javascript:$('#chat-container').toggle()>Chat</button>
-      <button type="button" class="btn btn-default btn-primary">Peer Id: <span class="boplish-peer-id" /></button>
+      <!--<button type="button" class="btn btn-default" onclick=javascript:$('#topology-viewer-container').toggle()>Topology Viewer</button>-->
+      <!--<button type="button" class="btn btn-default" onclick=javascript:$('#game-container').toggle()>Game</button>-->
+      <!--<button type="button" class="btn btn-default" onclick=javascript:$('#chat-container').toggle()>Chat</button>-->
+      <!--<button onclick=alert(10) type="button" class="btn btn-primary">Peer Id: <span class="boplish-peer-id" /></button>-->
     </div>
   </div><!-- /.container -->
   <div class="container" style="display:none" id="header-container">
@@ -123,11 +119,12 @@
   </div><!-- /.container -->
 
 
-  <div class="container" style="display:none" id="message-inspector-container">
+  <div class="container" id="message-inspector-container">
     <div class="well">
       <h3>Message Inspector</h3>
       <div class="row">
         <div class="col-md-4" style="-webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;">
+          <p>My BOP ID: <a class="boplish-peer-id"></a></p>
           <p>This browser-based peer is currently connected to <a id="count-remote-peers">0</a> remote peer(s) in the BOPlish network. Click on a peer id to send a ping message to it.</p>
           <p>Id's of connected peers:</p>
           <ul id="connected-peers">
@@ -136,6 +133,13 @@
         <div class="col-md-8">
           <div class="row">
             <div class="col-md-4">
+              <div class="input-group" style="width:100%; padding-top: 5px">
+                <input id="ping-bopid" style="width:100%" type="text" class="form-control" placeholder="bopid"></input>
+                <span class="input-group-btn">
+                  <button class="btn btn-primary" type="button" onclick=sendPing()>Ping</button>
+                </span>
+              </div>
+
               <h4>Messages:</h4>
               <h5><span class="message-inspector-in">IN</span> <span class="message-inspector-out">OUT</span> <span class="message-inspector-forward">FORWARD</span></h5>
               <div id="message-inspector-headers"></div>
@@ -148,9 +152,18 @@
         </div>
       </div>
     </div>
+  <script>
+    function sendPing() {
+      var bopid = $('#ping-bopid').val();
+      pinger.sendPing(bopid, null, function(err, ms) {
+        console.log('ping took', ms, 'ms');
+      });
+    }
+  </script>
   </div><!-- /.container -->
 
 
+<!--
   <div class="container" style="display:none" id="topology-viewer-container">
     <div class="well">
       <h3>Topology Viewer
@@ -173,8 +186,9 @@
       </h3>
       <svg id="topology-viewer-container-svg"></svg>
     </div>
-  </div><!-- /.container -->
-
+  </div>
+-->
+<!--
   <div class="container" style="display:none" id="game-container">
     <div class="well">
       <h3>Game
@@ -186,8 +200,9 @@
       </h3>
       <canvas id="game-canvas"></canvas>
     </div>
-  </div><!-- /.container -->
-
+  </div>
+-->
+<!--
   <div class="container" id="chat-container">
     <div class="well">
       <h3>Chat</h3>
@@ -210,7 +225,9 @@
         }
       }
     </script>
-  </div><!-- /.container -->
+  </div>
+-->
+
     <!-- Error Modal -->
   <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
