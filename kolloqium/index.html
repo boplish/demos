@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>BOPlish Topology Viewer</title>
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/d3.v3.min.js"></script>
+    <script src="js/boplish.js"></script>
+    <script src="protocols.topology.js"></script>
+    <script src="apps.topoviewer.js"></script>
+    <script src="app.js"></script>
+  </head>
+  <body>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12">
+          <span><button type="button" class="btn btn-xs btn-primary" id="scribe-fingerTabletoggle" href="#" data-toggle="FingerTableToggle">Show Finger Table</button></span>
+          <span>BopID: <a class="scribe-bopId"></a></span>
+          <span>Me: <a class="scribe-peerId"></a></span>
+          <span>Predecessor: <a class="scribe-peerIdPredecessor"></a></span>
+          <span>Successor: <a class="scribe-peerIdSuccessor"></a></span>
+        </div>
+      </div>
+      <div id="fingerTable" class="row fingerTable">
+
+        <div class="col-xs-3">
+          <table id="fingerTable0" class="table table-condensed table-striped">
+            <thead> 
+              <tr>
+                <th>k</th>
+                <th>Key</th> 
+                <th>Predecessor</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-xs-3">
+          <table id="fingerTable1" class="table table-condensed table-striped">
+            <thead> 
+              <tr>
+                <th>k</th>
+                <th>Key</th> 
+                <th>Predecessor</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="col-xs-3">
+          <table id="fingerTable2" class="table table-condensed table-striped">
+            <thead> 
+              <tr>
+                <th>k</th>
+                <th>Key</th> 
+                <th>Predecessor</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-xs-3">
+          <table id="fingerTable3" class="table table-condensed table-striped">
+            <thead> 
+              <tr>
+                <th>k</th>
+                <th>Key</th> 
+                <th>Predecessor</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+      
+      <div class="row">
+        <div class="col-xs-12">
+          <h3>Topology Viewer</h3>
+        </div>
+      </div>
+      <div class="row">        
+        <div class="col-xs-2" style="margin-top: 10px">
+          <p>
+            <button type="button" class="btn btn-success btn-xs" onclick=javascript:topoviewer.update()>Refresh</button>
+          </p>
+          <p>
+            <button type="button" class="btn btn-success btn-xs" onclick=javascript:topoviewer._render()>Re-Render</button>
+          </p>
+        </div>
+        <div class="col-xs-10">
+          <svg id="topo-svg" style="width:100%; height:500px"></svg>
+        </div>
+      </div>
+  </body>
+</html>
